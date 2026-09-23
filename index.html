@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Whack-A-Mole</title>
+    <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+</head>
+<body>
+    <a-scene>
+        <a-assets>
+            <!-- Wood texture for arcade top plane -->
+            <img id="wood-texture" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%238b4513'/><path d='M0 20 Q50 40 100 20 T200 20 M0 80 Q50 100 100 80 T200 80 M0 140 Q50 160 100 140 T200 140' stroke='%235c2e0b' stroke-width='6' fill='none'/></svg>">
+            
+            <!-- Mole texture for cylinder moles -->
+            <img id="mole-texture" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23a0522d'/><circle cx='100' cy='120' r='40' fill='%23ffebcd'/><circle cx='100' cy='100' r='10' fill='%23ffb6c1'/><circle cx='70' cy='75' r='12' fill='%23ffffff'/><circle cx='70' cy='75' r='6' fill='%23000000'/><circle cx='130' cy='75' r='12' fill='%23ffffff'/><circle cx='130' cy='75' r='6' fill='%23000000'/></svg>">
+        </a-assets>
+
+        <!-- Background Sky -->
+        <a-sky color="#1a1a2e"></a-sky>
+
+        <!-- Room Floor -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#16213e"></a-plane>
+
+        <!-- Arcade Top Horizontal Plane -->
+        <a-plane 
+            position="0 0.8 0" 
+            rotation="-90 0 0" 
+            width="5" 
+            height="5" 
+            src="#wood-texture">
+        </a-plane>
+
+        <!-- 5 Hole Rings Occupying 360-Degree Space Around Player -->
+        
+        <!-- Hole 1 (Front) -->
+        <a-ring position="0 0.81 -1.8" rotation="-90 0 0" radius-inner="0.25" radius-outer="0.35" color="#111111"></a-ring>
+
+        <!-- Hole 2 (Front Right) -->
+        <a-ring position="1.6 0.81 -0.8" rotation="-90 0 0" radius-inner="0.25" radius-outer="0.35" color="#111111"></a-ring>
+
+        <!-- Hole 3 (Back Right) -->
+        <a-ring position="1.1 0.81 1.4" rotation="-90 0 0" radius-inner="0.25" radius-outer="0.35" color="#111111"></a-ring>
+
+        <!-- Hole 4 (Back Left) -->
+        <a-ring position="-1.1 0.81 1.4" rotation="-90 0 0" radius-inner="0.25" radius-outer="0.35" color="#111111"></a-ring>
+
+        <!-- Hole 5 (Front Left) -->
+        <a-ring position="-1.6 0.81 -0.8" rotation="-90 0 0" radius-inner="0.25" radius-outer="0.35" color="#111111"></a-ring>
+
+        <!-- 5 Moles (Cylinders) Moving Up and Down -->
+
+        <!-- Mole 1 (Front) -->
+        <a-cylinder 
+            class="mole"
+            position="0 0.5 -1.8" 
+            radius="0.2" 
+            height="0.6" 
+            src="#mole-texture"
+            animation="property: position; from: 0 0.4 -1.8; to: 0 1.1 -1.8; dir: alternate; loop: true; dur: 1400; easing: easeInOutSine">
+        </a-cylinder>
+
+        <!-- Mole 2 (Front Right) -->
+        <a-cylinder 
+            class="mole"
+            position="1.6 0.5 -0.8" 
+            radius="0.2" 
+            height="0.6" 
+            src="#mole-texture"
+            animation="property: position; from: 1.6 0.4 -0.8; to: 1.6 1.1 -0.8; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
+        </a-cylinder>
+
+        <!-- Mole 3 (Back Right) -->
+        <a-cylinder 
+            class="mole"
+            position="1.1 0.5 1.4" 
+            radius="0.2" 
+            height="0.6" 
+            src="#mole-texture"
+            animation="property: position; from: 1.1 0.4 1.4; to: 1.1 1.1 1.4; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
+        </a-cylinder>
+
+        <!-- Mole 4 (Back Left) -->
+        <a-cylinder 
+            class="mole"
+            position="-1.1 0.5 1.4" 
+            radius="0.2" 
+            height="0.6" 
+            src="#mole-texture"
+            animation="property: position; from: -1.1 0.4 1.4; to: -1.1 1.1 1.4; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine">
+        </a-cylinder>
+
+        <!-- Mole 5 (Front Left) -->
+        <a-cylinder 
+            class="mole"
+            position="-1.6 0.5 -0.8" 
+            radius="0.2" 
+            height="0.6" 
+            src="#mole-texture"
+            animation="property: position; from: -1.6 0.4 -0.8; to: -1.6 1.1 -0.8; dir: alternate; loop: true; dur: 1500; easing: easeInOutSine">
+        </a-cylinder>
+
+        <!-- 3D Score Display Board -->
+        <a-text 
+            id="score-board" 
+            value="Score: 0" 
+            position="0 2.5 -2.5" 
+            align="center" 
+            color="#ffcc00" 
+            width="6">
+        </a-text>
+
+        <!-- Camera Viewpoint with Click Cursor -->
+        <a-camera position="0 1.6 0">
+            <a-cursor color="#00e5ff"></a-cursor>
+        </a-camera>
+
+    </a-scene>
+
+   
+    <script>
+        let score = 0;
+        let scoreBoard = document.querySelector("#score-board");
+        let moles = document.querySelectorAll(".mole");
+
+        // Loop through all 5 moles and add click events
+        moles.forEach(function(mole) {
+            mole.addEventListener("click", function() {
+                // Only catch if mole is currently visible
+                if (mole.getAttribute("visible") !== "false") {
+                    
+                    // Catch mole -> make invisible
+                    mole.setAttribute("visible", "false");
+
+                    // Increase score
+                    score += 10;
+                    scoreBoard.setAttribute("value", "Score: " + score);
+
+                    // Respawn mole after 2 seconds
+                    setTimeout(function() {
+                        mole.setAttribute("visible", "true");
+                    }, 2000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
